@@ -60,7 +60,7 @@ export default {
   },
   methods: {
     gggg () {
-      eval(this.mode)
+      eval(this.mode);
     },
     fullWindow (idx) {
       this.video[idx].player.requestFullscreen()
