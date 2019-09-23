@@ -258,8 +258,7 @@ export default {
         this.video[idx].device_name = data.device_name
         this.video[idx].id = data.id
         this.video[idx].stream_url = data.stream_url
-        this.video[idx].loading = 3
-        this.loadVideoByIndex(idx)
+        this.video[idx].loading = 1
       }
     },
     loadVideoByIndex (idx) {
@@ -271,7 +270,7 @@ export default {
         this.$nextTick(() => {
           // eslint-disable-next-line no-undef
           this.video[idx].player = videojs(this.video[idx].videoid, {
-            autoplay: true,
+            autoplay: false,
             muted: false, // 静音
             fluid: true,
             controls: false, // 控制条,
@@ -285,7 +284,7 @@ export default {
           }, function () {
             console.log('--------------成功初始化视频--------------')
             that.video[idx].loading = 3
-            // that.video[idx].player.play()
+            that.video[idx].player.play()
             that.video[idx].player.one('playing', function () { // 监听播放
               console.log('开始播放')
             })
@@ -342,7 +341,7 @@ export default {
           that.video[0].type = da.type
           that.video[0].work_type = da.work_type
           that.video[0].device_name = da.device_name
-          that.video[0].loading = 3
+          that.video[0].loading = 1
           that.video[0].player.src({
             src: da.stream_url
           })
