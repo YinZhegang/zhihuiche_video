@@ -265,6 +265,7 @@ export default {
     },
     loadVideoByIndex (idx) {
       var that = this
+      if (this.video[idx].loading == 3) return
       if (this.video[idx].player) {
         this.video[idx].loading = 2
         this.video[idx].player.play()
