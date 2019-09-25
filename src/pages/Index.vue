@@ -20,8 +20,8 @@
 <!--             图传获取失败，<a @click="reloadVideo(index)" style="color:rgb(205, 127, 11);text-decoration: none" href="javascrit:;">点击重试</a>-->
 <!--           </p>-->
          </div>
-         <div class="zhezhao2" @click="loadVideoByIndex(index)" :style="{lineHeight:item.height +5 +'px',fontSize:item.height/5 +'px',opacity:item.loading ==1?1:0 }">
-            <i style="font-size: 70px;color: #cacaca;opacity: .4" class="el-icon-video-play"></i>
+         <div class="zhezhao2" @click="loadVideoByIndex(index)" :style="{lineHeight:item.height +5 +'px',fontSize:item.height/5 +'px',opacity:item.loading ==1||item.loading==2?1:0 }">
+            <i style="font-size: 70px;color: #cacaca;opacity: .4" :class="item.loading==2?'el-icon-loading':'el-icon-video-play'"></i>
          </div>
          <div :ref="item.videoid" :style="{width: item.width + 'px',height: item.height + 'px',overflow:'hidden'}">
            <video :id="item.videoid" class="video-js" controls preload="auto" :style="{width: item.width + 'px',height: item.height + 'px'}">
@@ -40,6 +40,7 @@ import quanpin from '@/assets/quanpin.png'
 import quanpin2 from '@/assets/quanpin2.png'
 import close from '@/assets/close.png'
 import jiankong from '@/assets/jiankonghover.png'
+import loading from '@/assets/loading.gif'
 import videoItem from '@/components/video-item'
 export default {
   name: 'Index',
@@ -47,7 +48,7 @@ export default {
     return {
       mode: '',
       icon: {
-        ren, quanpin, quanpin2, close, videoItem, tongxunche, jiankong, camera
+        ren, quanpin, quanpin2, close, videoItem, tongxunche, jiankong, camera, loading
       },
       videoSix: [],
       clientWidth: 0,
@@ -60,7 +61,7 @@ export default {
   },
   methods: {
     gggg () {
-      eval(this.mode);
+      eval(this.mode)
     },
     fullWindow (idx) {
       this.video[idx].player.requestFullscreen()
@@ -233,7 +234,7 @@ export default {
       }
     },
     enterFullScreen (idx) {
-      if (this.video[idx].loading == 0 || this.video[idx].loading == -1) return
+      if (this.video[idx].loading == 0 || this.video[idx].loading == -1 || this.video[idx].loading == 2) return
       this.video[idx].player.requestFullscreen()
       DispatchJSManger.FullWindow()
     },
@@ -245,10 +246,11 @@ export default {
         this.video[idx].type = data.type
         this.video[idx].work_type = data.work_type
         this.video[idx].device_name = data.device_name
-        this.video[idx].loading = 3
+        this.video[idx].loading = 1
         this.video[idx].player.src({
           src: data.stream_url
         })
+        this.video[idx].player.pause()
         // this.$nextTick(() => {
         //   this.video[idx].player.pause()
         // })
@@ -264,10 +266,11 @@ export default {
     loadVideoByIndex (idx) {
       var that = this
       if (this.video[idx].player) {
-        this.video[idx].loading = 3
+        this.video[idx].loading = 2
         this.video[idx].player.play()
       } else {
         this.$nextTick(() => {
+          this.video[idx].loading = 2
           // eslint-disable-next-line no-undef
           this.video[idx].player = videojs(this.video[idx].videoid, {
             autoplay: false,
@@ -283,12 +286,12 @@ export default {
             // type: 'rtmp/flv'
           }, function () {
             console.log('--------------成功初始化视频--------------')
-            that.video[idx].loading = 3
             that.video[idx].player.play()
-            that.video[idx].player.one('playing', function () { // 监听播放
+            that.video[idx].player.on('playing', function () { // 监听播放
               console.log('开始播放')
+              that.video[idx].loading = 3
             })
-            that.video[idx].player.one('error', function (error) { // 监听错误
+            that.video[idx].player.on('error', function (error) { // 监听错误
               console.error('监听到异常，错误信息：%o', error)
               that.video[idx].loading = -1
             })
@@ -342,9 +345,13 @@ export default {
           that.video[0].work_type = da.work_type
           that.video[0].device_name = da.device_name
           that.video[0].loading = 1
-          that.video[0].player.src({
-            src: da.stream_url
-          })
+          if (that.video[0].player) {
+            that.video[0].player.src({
+              src: da.stream_url
+            })
+          } else {
+            that.video[0].stream_url = da.stream_url
+          }
 
           break
         }
