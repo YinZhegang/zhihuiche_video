@@ -16,6 +16,7 @@ export default {
     padding: 0;
   }
   body{
+    background-color: #F5F5F5;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;

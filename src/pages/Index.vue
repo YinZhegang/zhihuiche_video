@@ -42,10 +42,12 @@ import close from '@/assets/close.png'
 import jiankong from '@/assets/jiankonghover.png'
 import loading from '@/assets/loading.gif'
 import videoItem from '@/components/video-item'
+import { Message } from 'element-ui'
 export default {
   name: 'Index',
   data () {
     return {
+      throtle: true,
       mode: '',
       icon: {
         ren, quanpin, quanpin2, close, videoItem, tongxunche, jiankong, camera, loading
@@ -206,7 +208,7 @@ export default {
           loading: 0,
           player: null
         })
-      };
+      }
       switch (n) {
         case 4:
           for (let i = 0; i < n; i++) {
@@ -243,24 +245,27 @@ export default {
     },
     loadDataByIndex (idx, data) {
       if (this.video[idx].player) {
+        this.video[idx].device_id = data.device_id
         this.video[idx].type = data.type
         this.video[idx].work_type = data.work_type
         this.video[idx].device_name = data.device_name
-        this.video[idx].loading = 1
+        this.video[idx].loading = 2
         this.video[idx].player.src({
           src: data.stream_url
         })
-        this.video[idx].player.pause()
+        this.video[idx].player.play()
         // this.$nextTick(() => {
         //   this.video[idx].player.pause()
         // })
       } else {
+        this.video[idx].device_id = data.device_id
         this.video[idx].type = data.type
         this.video[idx].work_type = data.work_type
         this.video[idx].device_name = data.device_name
         this.video[idx].id = data.id
         this.video[idx].stream_url = data.stream_url
-        this.video[idx].loading = 1
+        // this.video[idx].loading = 1
+        this.loadVideoByIndex(idx)
       }
     },
     loadVideoByIndex (idx) {
@@ -290,6 +295,10 @@ export default {
             that.video[idx].player.play()
             that.video[idx].player.on('playing', function () { // 监听播放
               console.log('开始播放')
+              if (that.video[idx].loading == 0) {
+                that.video[idx].player.pause()
+                return
+              }
               that.video[idx].loading = 3
             })
             that.video[idx].player.on('error', function (error) { // 监听错误
@@ -318,7 +327,6 @@ export default {
         try {
           this.video[i].player.exitFullscreen()
         } catch (e) {
-
         }
       }
     }
@@ -329,10 +337,21 @@ export default {
       this.loadDataByIndex(index, JSON.parse(data))
     }
     window.insertVideo = (data) => {
+      if (!this.throtle) return
       var that = this
       let da = JSON.parse(data)
       let len = this.video.length
       for (let i = 0; i < len; i++) {
+        // if (this.video[i].device_id == da.device_id) {
+        //   if (this.video[i].loading == 3) {
+        //     Message({
+        //       message: '视频已经加载，请勿重复添加',
+        //       type: 'warning',
+        //       center: true
+        //     })
+        //     return
+        //   }
+        // }
         if (this.video[i].loading == 0) {
           this.loadDataByIndex(i, da)
           // this.video[i].loading = 1
@@ -345,15 +364,15 @@ export default {
           that.video[0].type = da.type
           that.video[0].work_type = da.work_type
           that.video[0].device_name = da.device_name
-          that.video[0].loading = 1
+          that.video[0].loading = 2
           if (that.video[0].player) {
             that.video[0].player.src({
               src: da.stream_url
             })
+            that.video[0].player.play()
           } else {
             that.video[0].stream_url = da.stream_url
           }
-
           break
         }
       }

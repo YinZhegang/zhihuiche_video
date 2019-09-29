@@ -96,6 +96,7 @@ document.oncontextmenu = function (e) {
 Vue.config.productionTip = false
 Vue.use(Icon)
 Vue.use(Button)
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
